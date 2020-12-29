@@ -41,19 +41,33 @@ import socket
 #     s.close()
 
 def Main():
-    try:
-        # local host IP '127.0.0.1'
-        ip = '127.0.0.1'
-        port = 13117
-        client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        client.bind(("", 13117))
-        print("Client started, listening for offer requests...")
-        data, addr = client.recvfrom(1024)
-        print(data)
-        print("Received offer from "+ip+","+" attempting to connect...")
-    except:
-        print("bla")
+    message = b'\xfe\xed\xbe\xef\x02'
+    while True:
+        #try:
+            # local host IP '127.0.0.1'
+            ip = '127.0.0.1'
+
+            #UDP
+            port = 13117
+            client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            client.bind(("", port))
+
+            #TCP
+            clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            print("Client started, listening for offer requests...")
+            data, addr = client.recvfrom(1024)
+            if data[0:4] != message[0:4]:
+                print('Wrong message')
+                continue
+
+            print("Received offer from " + ip + "," + " attempting to connect...")
+            clientTCP.connect((ip, int(hex(data[5])[2:]+hex(data[6])[2:], 16)))
+            clientTCP.sendall(bytes('Liad&Shahar', 'utf-8'))
+
+        #except:
+            #print("bla")
 
 
 
