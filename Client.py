@@ -51,7 +51,7 @@ def Main():
             port = 13117
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
             client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            client.bind(("", 13117))
+            client.bind(("", port))
 
             #TCP
             clientTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
