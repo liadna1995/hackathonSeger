@@ -1,5 +1,6 @@
 # Import socket module
 import socket
+# from scapy.all import get_if_addr
 
 # import to game
 # windows
@@ -20,6 +21,7 @@ import time
 
 def Main():
     host = '127.0.0.1'
+    # host =  get_if_addr('eth1')
     port = 13117
 
     # the message we suppose to get

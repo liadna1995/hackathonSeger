@@ -1,13 +1,15 @@
 # import socket programming library
 import socket
 import time
+import concurrent.futures
 
 # import thread module
 import _thread
-
+# from scapy.all import get_if_addr
 
 def udpBroadcast():
     host = '127.0.0.1'
+    # host =  get_if_addr('eth1')
     port = 13117
 
     # UDP socket
@@ -47,6 +49,7 @@ def tcpConnection(tcpSocket, clients):
         print(data.decode("utf-8"))
         # save the client in the dict
         clients[data.decode("utf-8")] = clientConn
+    return clients
 
 def StartGame(clients):
     # timeout after 10 seconds
@@ -75,8 +78,8 @@ def StartGame(clients):
             _thread.start_new_thread(GameMode, (clientName, group1, group2, clientConn, welcome,))
         time.sleep(10.2)
 
-    GameOver = 'Game over!\n'
-    GameOver += 'Group 1 typed in ' + str(sum(group1.values())) + ' characters. Group 2 typed in ' + str(sum(group2.values())) + ' characters.\n'
+        GameOver = 'Game over!\n'
+        GameOver += 'Group 1 typed in ' + str(sum(group1.values())) + ' characters. Group 2 typed in ' + str(sum(group2.values())) + ' characters.\n'
     if sum(group1.values()) > sum(group2.values()):
         GameOver += 'Group 1 wins!\n'
         GameOver += 'Congratulations to the winners:\n==\n'
@@ -110,10 +113,11 @@ def Main():
     clients = {}
 
     host = '127.0.0.1'
+    # host =  get_if_addr('eth1')
     port = 5005
 
     # TCP socket
-    BUFFER_SIZE = 20  # Usually 1024, but we need quick response
+    # BUFFER_SIZE = 20  # Usually 1024, but we need quick response
     tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -130,9 +134,7 @@ def Main():
         StartGame(clients)
         #tcpServer.close()
         print('Game over, sending out offer requests...')
-
-
-
+        clients.clear()
 
 if __name__ == '__main__':
     Main()
