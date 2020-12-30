@@ -72,7 +72,7 @@ def StartGame(clients):
         welcome += '\nStart pressing keys on your keyboard as fast as you can!!\n'
 
         for clientName, clientConn in clients.items():
-            _thread.start_new_thread(GameMode, (group1, group2, clientConn, welcome,))
+            _thread.start_new_thread(GameMode, (clientName, group1, group2, clientConn, welcome,))
         time.sleep(10.2)
 
     GameOver = 'Game over!\n'
@@ -91,24 +91,26 @@ def StartGame(clients):
         GameOver += 'It is a tie!\n'
 
     for clientConn in clients.values():
-        clientConn.send(bytes(GameOver, 'utf-8'))
+        clientConn.sendall(bytes(GameOver, 'utf-8'))
 
 def GameMode(clientName, group1, group2, clientConn, welcome):
-    clientConn.send(bytes(welcome, 'utf-8'))
+    clientConn.sendall(bytes(welcome, 'utf-8'))
+    # timeout after 10 seconds
+    start = time.time()
+    while time.time() - start < 10:
+        keyPress = clientConn.recv(1024)
+        if clientName in group1.keys():
+            group1[clientName] += 1
 
-    keyPress = clientConn.recv(1024)
-    if clientName in group1.keys():
-        group1[clientName] += 1
-
-    if clientName in group2.keys():
-        group2[clientName] += 1
+        if clientName in group2.keys():
+            group2[clientName] += 1
 
 
 def Main():
     clients = {}
 
     host = '127.0.0.1'
-    port = 2060
+    port = 5005
 
     # TCP socket
     BUFFER_SIZE = 20  # Usually 1024, but we need quick response
@@ -126,7 +128,7 @@ def Main():
         _thread.start_new_thread(tcpConnection, (tcpServer, clients))
         time.sleep(10.2)
         StartGame(clients)
-        tcpServer.close()
+        #tcpServer.close()
         print('Game over, sending out offer requests...')
 
 

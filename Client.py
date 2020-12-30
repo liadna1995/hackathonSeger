@@ -68,7 +68,7 @@ def Main():
                 keyPress = msvcrt.getch()
 
                 # send the key that pressed
-                tcpClient.sendall(bytes(keyPress, 'utf-8'))
+                tcpClient.send(keyPress)
 
         # linux
         # def isData():
@@ -94,7 +94,7 @@ def Main():
         GameOverData = tcpClient.recvfrom(1024)
         print(GameOverData[0].decode("utf-8"))
 
-        tcpClient.fileno() == -1
+        #tcpClient.fileno() == -1
         print('Server disconnected, listening for offer requests...')
 
 
