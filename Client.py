@@ -6,7 +6,6 @@ import socket
 # windows
 import msvcrt
 
-
 # linux
 # import sys
 # import select
@@ -27,15 +26,14 @@ def LookingForAServer(host):
         # UDP socket
         udpClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         udpClient.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
-    except socket.error as e:
-        print("Error creating socket: " + str(e))
+    # Error creating socket
+    except socket.error:
         return False
 
     try:
         udpClient.bind(("", port))
-    except socket.error as e:
-        print("Error to bind: " + str(e))
+    # Error to bind
+    except socket.error:
         return False
 
     # mode of listening
@@ -44,13 +42,13 @@ def LookingForAServer(host):
     try:
         # receive message from server
         data, addr = udpClient.recvfrom(1024)
-    except socket.error as e:
-        print("Error receiving data: " + str(e))
+    # Error receiving data
+    except socket.error:
+        print("Server disconnected")
         return False
 
     # check if this is good message
     if data[0:4] != message[0:4] or len(data) == 0:
-        print('Wrong message\n')
         return False
     else:
         tcpPort = int(hex(data[5])[2:] + hex(data[6])[2:], 16)
@@ -62,33 +60,33 @@ def ConnectingToAServer(host, tcpPort):
     try:
         # TCP socket
         tcpClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error as e:
-        print("Error creating socket: " + str(e))
+    # Error creating socket
+    except socket.error:
         return False
 
     try:
         # connect to the server with the socket that sent in the message
         tcpClient.connect((host, tcpPort))
-    except socket.error as e:
-        print("Error to connect: " + str(e))
+    # Error to connect
+    except socket.error:
         return False
 
     try:
         # send the group name
         tcpClient.sendall(bytes('Bits Magnet\n', 'utf-8'))
-    except socket.error as e:
-        print("Error sending data: " + str(e))
+    # Error sending data
+    except socket.error:
+        print("Server disconnected")
         return False
 
     try:
         # receive message from server
         WelcomeData = tcpClient.recvfrom(1024)
-    except socket.error as e:
-        print("Error receiving data: " + str(e))
+    # Error receiving data
+    except socket.error:
+        print("Server disconnected")
         return False
-
     if len(WelcomeData) == 0:
-        print('The server does not respond')
         return False
     else:
         print(WelcomeData[0].decode("utf-8"))
@@ -105,8 +103,9 @@ def GameMode(tcpClient):
             try:
                 # send the key that pressed
                 tcpClient.send(keyPress)
-            except socket.error as e:
-                print("Error sending data: " + str(e))
+            # Error sending data
+            except socket.error:
+                print("Server disconnected")
                 return False
     # linux
     # def isData():
@@ -131,11 +130,11 @@ def GameMode(tcpClient):
     try:
         # receive message from server
         GameOverData = tcpClient.recvfrom(1024)
-    except socket.error as e:
-        print("Error receiving data: " + str(e))
+    # Error receiving data
+    except socket.error:
+        print("Server disconnected")
         return False
     if len(GameOverData) == 0:
-        print('The server does not respond')
         return False
     print(GameOverData[0].decode("utf-8"))
     return True
@@ -156,7 +155,7 @@ def Main():
         tcpClient.close()
 
         print('Server disconnected, listening for offer requests...\n')
-        print('*****************************************************\n')
+        print('*******************************************\n')
 
 
 if __name__ == '__main__':
