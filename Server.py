@@ -14,14 +14,15 @@ def udpBroadcast(host):
         udpSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udpSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         udpSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    except socket.error as e:
-        print("Error creating socket: " + str(e))
+
+    # Error creating socket
+    except socket.error:
         return False
 
     try:
         udpSock.bind((host, port))
-    except socket.error as e:
-        print("Error to bind: " + str(e))
+    # Error to bind
+    except socket.error:
         return False
 
     # mode of listening
@@ -40,8 +41,8 @@ def udpBroadcast(host):
         # send broadcast one every second
         try:
             udpSock.sendto(message, ('<broadcast>', port))
-        except socket.error as e:
-            print("Error sending data: " + str(e))
+        # Error sending data
+        except socket.error:
             return False
         time.sleep(1)
 
@@ -53,8 +54,9 @@ def tcpConnection(tcpSocket, clients):
             # get client name
             clientConn, addr = tcpSocket.accept()
             data = clientConn.recv(1024)
-        except socket.error as e:
-            print("Error receiving data: " + str(e))
+        # Error receiving data
+        except socket.error:
+            print("Client disconnected")
             return False
         if len(data) == 0:
             return False
@@ -81,7 +83,8 @@ def GameMode(clients, characters, GamesHistory):
     counter = 0
 
     # building the welcome message
-    welcome = 'Welcome to Keyboard Spamming Battle Royale.\nGroup1:\n==\n'
+    welcome = '*******************************************\n'
+    welcome += 'Welcome to Keyboard Spamming Battle Royale.\n\nGroup1:\n==\n'
 
     # randomly division into groups
     for c in clients.keys():
@@ -95,13 +98,15 @@ def GameMode(clients, characters, GamesHistory):
     if len(group1) != 0:
         for g1 in group1.keys():
             welcome += g1
-    welcome += 'Group2:\n'
+    welcome += '\nGroup2:\n==\n'
     if len(group2) != 0:
         for g2 in group2.keys():
             welcome += g2
     else:
         welcome += 'There no players in Group 2, you play alone!\n'
+    welcome += '*******************************************\n'
     welcome += '\nStart pressing keys on your keyboard as fast as you can!!\n'
+
 
     # the game is starting
     for clientName, clientConn in clients.items():
@@ -109,10 +114,12 @@ def GameMode(clients, characters, GamesHistory):
     time.sleep(10.2)
 
     # building the game over message
-    GameOver = 'Game over!\n'
-    GameOver += 'Group 1 typed in ' + str(sum(group1.values())) + ' characters. Group 2 typed in ' + str(sum(group2.values())) + ' characters.\n'
+    GameOver = '*******************************************\n'
+    GameOver += '\nGame over!\n'
+    GameOver += 'Group 1 typed in ' + str(sum(group1.values())) + ' characters.\nGroup 2 typed in ' + str(sum(group2.values())) + ' characters.\n'
     if sum(group1.values()) > sum(group2.values()):
-        GameOver += 'Group 1 wins!\n'
+        GameOver += '\n************** Group 1 wins! **************\n'
+        GameOver += '*******************************************\n'
         GameOver += 'Congratulations to the winners:\n==\n'
         for g1 in group1.keys():
             GameOver += g1
@@ -123,10 +130,11 @@ def GameMode(clients, characters, GamesHistory):
             GameOver += g2
     else:
         GameOver += 'It is a tie!\n'
+    GameOver += '*******************************************\n'
 
     # calculate statistics
     if len(characters) != 0 or len(GamesHistory) != 0:
-        GameOver += '\nStatistics:'
+        GameOver += '\nStatistics:\n'
     if len(characters) != 0:
         max_value = max(characters.values())  # maximum value
         max_keys = [k for k, v in characters.items() if v == max_value]  # getting all keys containing the `maximum`
@@ -139,29 +147,33 @@ def GameMode(clients, characters, GamesHistory):
         max_value = max(GamesHistory.values())  # maximum value
         max_keys = [k for k, v in GamesHistory.items() if v == max_value]  # getting all keys containing the `maximum`
 
-        GameOver += 'Best team ever to play:\n'
+        GameOver += '\nBest team ever to play:\n'
         for m in max_keys:
             GameOver += m + '\n'
+        GameOver += '*******************************************\n'
 
     # sending the game over all the clients
     for clientConn in clients.values():
         try:
             clientConn.sendall(bytes(GameOver, 'utf-8'))
-        except socket.error as e:
-            print("Error sending data: " + str(e))
+        # Error sending data
+        except socket.error:
+            print("Client disconnected")
 
 def StartPressing(clientName, group1, group2, clientConn, welcome, characters, GamesHistory):
     try:
         clientConn.sendall(bytes(welcome, 'utf-8'))
-    except socket.error as e:
-        print("Error sending data: " + str(e))
+    # Error sending data
+    except socket.error:
+        print("Client disconnected")
     # timeout after 10 seconds
     start = time.time()
     while time.time() - start < 10:
         try:
             keyPress = clientConn.recv(1024)
-        except socket.error as e:
-            print("Error receiving data: " + str(e))
+        # Error receiving data
+        except socket.error:
+            print("Client disconnected")
         if len(keyPress) != 0:
             char = keyPress.decode("utf-8")
             if char not in characters:
@@ -192,15 +204,15 @@ def Main():
             try:
                 # TCP socket
                 tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            except socket.error as e:
-                print("Error creating socket: " + str(e))
+            # Error creating socket
+            except socket.error:
                 continue
 
             try:
                 tcpServer.bind((host, port))
                 tcpServer.listen(20)
-            except socket.error as e:
-                print("Error to bind: " + str(e))
+            # Error to bind
+            except socket.error:
                 continue
             openSocket = False
 
@@ -212,7 +224,7 @@ def Main():
 
         # close the connection
         try:
-            data = tcpServer.recv(1024)
+            tcpServer.recv(1024)
         except socket.error:
             tcpServer.close()
         clients.clear()
